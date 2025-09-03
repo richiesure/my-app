@@ -1,0 +1,5 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for CI/CD Pipeline
+
+Resources:
+  # We will define CodePipeline, CodeBuild, CodeDeploy here later

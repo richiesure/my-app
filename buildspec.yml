@@ -1,0 +1,16 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Installing dependencies"
+      - npm install
+  build:
+    commands:
+      - echo "Running build step"
+      - npm run build || echo "No build step, skipping"
+
+artifacts:
+  files:
+    - '**/*'
+  discard-paths: yes

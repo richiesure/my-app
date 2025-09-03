@@ -68,8 +68,9 @@ Resources:
                 - Name: SourceOutput
               OutputArtifacts:
                 - Name: BuildOutput
+              Configuration:
+                ProjectName: MyAppCodeBuildProject
               RunOrder: 1
-
         # -------- Deploy Stage --------
         - Name: Deploy
           Actions:

@@ -7,11 +7,9 @@ phases:
 
   build:
     commands:
-      - echo "Building project..."
       - echo "Copying template for deployment"
       - cp template.yaml output-template.yaml
 
 artifacts:
   files:
     - output-template.yaml
-    - src/**      # Include all files in the src folder

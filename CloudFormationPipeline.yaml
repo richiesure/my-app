@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CI/CD pipeline for my-app using CodePipeline and CodeBuild
+Description: CI/CD pipeline for deploying my-app using CodePipeline and CodeBuild
 
 Resources:
 
@@ -19,6 +19,20 @@ Resources:
         Type: LINUX_CONTAINER
       Source:
         Type: CODEPIPELINE
+        BuildSpec: |
+          version: 0.2
+          phases:
+            install:
+              commands:
+                - echo "No dependencies to install"
+            build:
+              commands:
+                - echo "Building project..."
+                - echo "Copying template for deployment"
+                - cp template.yaml output-template.yaml
+          artifacts:
+            files:
+              - output-template.yaml
       TimeoutInMinutes: 10
 
   # ----------------------
@@ -51,7 +65,6 @@ Resources:
                 BranchName: main
               OutputArtifacts:
                 - Name: SourceOutput
-              RunOrder: 1
 
         # -------- Build Stage --------
         - Name: Build
@@ -62,15 +75,13 @@ Resources:
                 Owner: AWS
                 Provider: CodeBuild
                 Version: 1
-              Configuration:
-                ProjectName: MyAppCodeBuildProject
               InputArtifacts:
                 - Name: SourceOutput
               OutputArtifacts:
                 - Name: BuildOutput
               Configuration:
                 ProjectName: MyAppCodeBuildProject
-              RunOrder: 1
+
         # -------- Deploy Stage --------
         - Name: Deploy
           Actions:
@@ -80,15 +91,13 @@ Resources:
                 Owner: AWS
                 Provider: CloudFormation
                 Version: 1
-              Configuration:
-                ActionMode: CREATE_UPDATE
-                StackName: MyAppDeploymentStack
-                Capabilities: CAPABILITY_IAM
-                RoleArn: arn:aws:iam::150297827048:role/ProdDeploymentRole
-                TemplatePath: BuildOutput::template.yaml
               InputArtifacts:
                 - Name: BuildOutput
-              RunOrder: 1
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                StackName: MyAppStack
+                Capabilities: CAPABILITY_IAM
+                TemplatePath: BuildOutput::output-template.yaml
 
 Outputs:
   PipelineName:

@@ -1,16 +1,27 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: CloudFormation template for CI/CD Pipeline
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CI/CD Pipeline for My App
+
+Parameters:
+  GitHubRepo:
+    Type: String
+    Default: "richiesure/my-app"
+  GitHubBranch:
+    Type: String
+    Default: "main"
+  GitHubSecretName:
+    Type: String
+    Default: "github/MyGitHubToken"
 
 Resources:
-  # We will define CodePipeline, CodeBuild, CodeDeploy here later
-AWSTemplateFormatVersion: '2010-09-09'
-Description: CI/CD Pipeline for Node.js App (Efemena Isaac)
+  CodePipelineArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: cicd-artifacts-150297827048
 
-Resources:
-  CICDPipeline:
+  CodePipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
-      RoleArn: arn:aws:iam::150297827048:role/CodePipelineServiceRole
+      RoleArn: arn:aws:iam::150297827048:role/CodePipelineDeploymentRole
       ArtifactStore:
         Type: S3
         Location: cicd-artifacts-150297827048
@@ -24,15 +35,15 @@ Resources:
               ActionTypeId:
                 Category: Source
                 Owner: AWS
-                Provider: GitHub
-                Version: 1
+                Provider: CodeStarSourceConnection
+                Version: "1"
               OutputArtifacts:
                 - Name: SourceOutput
               Configuration:
-                Owner: EfemenaIsaac
-                Repo: my-app
-                Branch: main
-                OAuthToken: !Sub "{{resolve:secretsmanager:GitHubTokenSecret:SecretString:token}}"
+                ConnectionArn: arn:aws:codestar-connections:eu-west-2:150297827048:connection/REPLACE_WITH_CONNECTION_ID
+                FullRepositoryId: "richiesure/my-app"
+                BranchName: "main"
+
         - Name: Build
           Actions:
             - Name: BuildAction
@@ -40,37 +51,31 @@ Resources:
                 Category: Build
                 Owner: AWS
                 Provider: CodeBuild
-                Version: 1
+                Version: "1"
               InputArtifacts:
                 - Name: SourceOutput
               OutputArtifacts:
                 - Name: BuildOutput
               Configuration:
-                ProjectName: my-app-build
-        - Name: DeployPreProd
+                ProjectName: MyAppBuildProject
+
+        - Name: Deploy
           Actions:
-            - Name: DeployPreProdAction
-              ActionTypeId:
-                Category: Deploy
-                Owner: AWS
-                Provider: CodeDeploy
-                Version: 1
-              InputArtifacts:
-                - Name: BuildOutput
-              Configuration:
-                ApplicationName: my-app-preprod
-                DeploymentGroupName: preprod-group
-        - Name: DeployProd
-          Actions:
-            - Name: DeployProdAction
+            - Name: DeployAction
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
                 Provider: CloudFormation
-                Version: 1
+                Version: "1"
               InputArtifacts:
                 - Name: BuildOutput
               Configuration:
-                StackName: prod-stack
-                Capabilities: CAPABILITY_IAM
+                ActionMode: CREATE_UPDATE
+                StackName: MyAppStack
+                Capabilities: CAPABILITY_NAMED_IAM
                 RoleArn: arn:aws:iam::150297827048:role/ProdDeploymentRole
+
+Outputs:
+  PipelineName:
+    Value: !Ref CodePipeline
+    Description: The name of the created pipeline

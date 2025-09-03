@@ -1,8 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CI/CD pipeline for my-app with CodeBuild and CodePipeline
+Description: CI/CD Pipeline for my-app using CodePipeline and CodeBuild
 
 Resources:
-
   # ----------------------
   # CodeBuild Project
   # ----------------------
@@ -44,14 +43,13 @@ Resources:
                 Category: Source
                 Owner: AWS
                 Provider: CodeStarSourceConnection
-                Version: '1'
-              OutputArtifacts:
-                - Name: SourceOutput
+                Version: 1
               Configuration:
                 ConnectionArn: arn:aws:codeconnections:eu-west-2:150297827048:connection/2a8a5326-5267-482d-a70b-3d9e3a4a6204
                 FullRepositoryId: richiesure/my-app
                 BranchName: main
-              RunOrder: 1
+              OutputArtifacts:
+                - Name: SourceOutput
 
         # -------- Build Stage --------
         - Name: Build
@@ -61,14 +59,13 @@ Resources:
                 Category: Build
                 Owner: AWS
                 Provider: CodeBuild
-                Version: '1'
+                Version: 1
               InputArtifacts:
                 - Name: SourceOutput
               OutputArtifacts:
                 - Name: BuildOutput
               Configuration:
                 ProjectName: MyAppCodeBuildProject
-              RunOrder: 1
 
         # -------- Deploy Stage --------
         - Name: Deploy
@@ -78,15 +75,15 @@ Resources:
                 Category: Deploy
                 Owner: AWS
                 Provider: CloudFormation
-                Version: '1'
+                Version: 1
               InputArtifacts:
                 - Name: BuildOutput
               Configuration:
                 ActionMode: CREATE_UPDATE
-                StackName: MyAppDeploymentStack
+                StackName: MyPlaceholderStack
                 Capabilities: CAPABILITY_IAM
                 TemplatePath: BuildOutput::output-template.yaml
-              RunOrder: 1
+                RoleArn: arn:aws:iam::150297827048:role/ProdDeploymentRole
 
 Outputs:
   PipelineName:

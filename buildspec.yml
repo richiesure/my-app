@@ -5,10 +5,13 @@ phases:
     commands:
       - echo "Installing dependencies"
       - npm install
+
   build:
     commands:
       - echo "Building project..."
-      - cp template.yaml output-template.yaml
+      # Ensure we generate template.yaml directly
+      - cp template.yaml template.yaml
+
 artifacts:
   files:
-    - output-template.yaml
+    - template.yaml

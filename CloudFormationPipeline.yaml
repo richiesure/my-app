@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CI/CD pipeline for deploying my-app using CodePipeline and CodeBuild
+Description: CI/CD pipeline for my-app with CodeBuild and CodePipeline
 
 Resources:
 
@@ -19,20 +19,6 @@ Resources:
         Type: LINUX_CONTAINER
       Source:
         Type: CODEPIPELINE
-        BuildSpec: |
-          version: 0.2
-          phases:
-            install:
-              commands:
-                - echo "No dependencies to install"
-            build:
-              commands:
-                - echo "Building project..."
-                - echo "Copying template for deployment"
-                - cp template.yaml output-template.yaml
-          artifacts:
-            files:
-              - output-template.yaml
       TimeoutInMinutes: 10
 
   # ----------------------
@@ -58,13 +44,14 @@ Resources:
                 Category: Source
                 Owner: AWS
                 Provider: CodeStarSourceConnection
-                Version: 1
+                Version: '1'
+              OutputArtifacts:
+                - Name: SourceOutput
               Configuration:
                 ConnectionArn: arn:aws:codeconnections:eu-west-2:150297827048:connection/2a8a5326-5267-482d-a70b-3d9e3a4a6204
                 FullRepositoryId: richiesure/my-app
                 BranchName: main
-              OutputArtifacts:
-                - Name: SourceOutput
+              RunOrder: 1
 
         # -------- Build Stage --------
         - Name: Build
@@ -74,13 +61,14 @@ Resources:
                 Category: Build
                 Owner: AWS
                 Provider: CodeBuild
-                Version: 1
+                Version: '1'
               InputArtifacts:
                 - Name: SourceOutput
               OutputArtifacts:
                 - Name: BuildOutput
               Configuration:
                 ProjectName: MyAppCodeBuildProject
+              RunOrder: 1
 
         # -------- Deploy Stage --------
         - Name: Deploy
@@ -90,14 +78,15 @@ Resources:
                 Category: Deploy
                 Owner: AWS
                 Provider: CloudFormation
-                Version: 1
+                Version: '1'
               InputArtifacts:
                 - Name: BuildOutput
               Configuration:
                 ActionMode: CREATE_UPDATE
-                StackName: MyAppStack
+                StackName: MyAppDeploymentStack
                 Capabilities: CAPABILITY_IAM
                 TemplatePath: BuildOutput::output-template.yaml
+              RunOrder: 1
 
 Outputs:
   PipelineName:

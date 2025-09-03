@@ -1,0 +1,8 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Minimal stack for CodePipeline placeholder deploy
+
+Resources:
+  MyPlaceholderBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: myapp-placeholder-bucket-150297827048

@@ -3,17 +3,15 @@ version: 0.2
 phases:
   install:
     commands:
-      - echo "Installing dependencies..."
-      - npm install
+      - echo "No dependencies to install"
 
   build:
     commands:
       - echo "Building project..."
-      # If you had a build step like Webpack or TypeScript, add it here
-      - echo "Build completed!"
+      - echo "Copying template for deployment"
+      - cp template.yaml output-template.yaml
 
 artifacts:
   files:
-    - template.yaml
-    - src/**        # Include everything inside src folder
-    - package.json  # Optional: if needed for deployment
+    - output-template.yaml
+    - src/**      # Include all files in the src folder

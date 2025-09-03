@@ -3,7 +3,7 @@ Description: CI/CD Pipeline for my-app using CodePipeline and CodeBuild
 
 Resources:
   # ----------------------
-  # CodeBuild Project
+  # CodeBuild Project 
   # ----------------------
   MyAppCodeBuildProject:
     Type: AWS::CodeBuild::Project

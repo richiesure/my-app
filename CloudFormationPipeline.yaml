@@ -1,56 +1,26 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CI/CD Pipeline for my-app using CodePipeline and CodeBuild
-
 Resources:
-  # ----------------------
-  # CodeBuild Project
-  # ----------------------
-  MyAppCodeBuildProject:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Name: MyAppCodeBuildProject
-      ServiceRole: arn:aws:iam::150297827048:role/CodePipelineDeploymentRole
-      Artifacts:
-        Type: CODEPIPELINE
-      Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/standard:5.0
-        Type: LINUX_CONTAINER
-      Source:
-        Type: CODEPIPELINE
-      TimeoutInMinutes: 10
-
-  # ----------------------
-  # CodePipeline
-  # ----------------------
-  MyAppPipeline:
+  MyPipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
       Name: MyAppPipeline
-      RoleArn: arn:aws:iam::150297827048:role/CodePipelineDeploymentRole
-      ArtifactStore:
-        Type: S3
-        Location: cicd-artifacts-150297827048
-        EncryptionKey:
-          Id: arn:aws:kms:eu-west-2:150297827048:key/3bb8e03f-8372-4e2f-bfbf-4aafaad8dc39
-          Type: KMS
+      RoleArn: arn:aws:iam::150297827048:role/ProdDeploymentRole
       Stages:
-        # -------- Source Stage --------
         - Name: Source
           Actions:
             - Name: SourceAction
               ActionTypeId:
                 Category: Source
                 Owner: AWS
-                Provider: CodeStarSourceConnection
+                Provider: CodeCommit  # or GitHub/S3 depending on your source
                 Version: 1
-              Configuration:
-                ConnectionArn: arn:aws:codeconnections:eu-west-2:150297827048:connection/2a8a5326-5267-482d-a70b-3d9e3a4a6204
-                FullRepositoryId: richiesure/my-app
-                BranchName: main
               OutputArtifacts:
                 - Name: SourceOutput
-        # -------- Build Stage --------
+              Configuration:
+                RepositoryName: MyRepo
+                BranchName: main
+              RunOrder: 1
+
         - Name: Build
           Actions:
             - Name: BuildAction
@@ -62,10 +32,11 @@ Resources:
               InputArtifacts:
                 - Name: SourceOutput
               OutputArtifacts:
-                - Name: BuildOutput   # <- MUST match exactly
+                - Name: BuildOutput
               Configuration:
                 ProjectName: MyAppCodeBuildProject
-        # -------- Deploy Stage --------
+              RunOrder: 1
+
         - Name: Deploy
           Actions:
             - Name: DeployAction
@@ -73,22 +44,17 @@ Resources:
                 Category: Deploy
                 Owner: AWS
                 Provider: CloudFormation
-                Version: '1'
+                Version: 1
               InputArtifacts:
                 - Name: BuildOutput
               Configuration:
                 ActionMode: CREATE_UPDATE
                 StackName: MyAppDeploymentStack
-                TemplatePath: BuildOutput::template.yaml   # ✅ must match
+                TemplatePath: BuildOutput/template.yaml  # Correct path now
                 Capabilities: CAPABILITY_IAM
                 RoleArn: arn:aws:iam::150297827048:role/ProdDeploymentRole
               RunOrder: 1
 
-Outputs:
-  PipelineName:
-    Description: The name of the created pipeline
-    Value: !Ref MyAppPipeline
-
-  CodeBuildProjectName:
-    Description: The name of the CodeBuild project
-    Value: !Ref MyAppCodeBuildProject
+      ArtifactStore:
+        Type: S3
+        Location: my-codepipeline-artifact-bucket   # replace with your S3 bucket name

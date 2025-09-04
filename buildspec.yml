@@ -12,5 +12,5 @@ phases:
 
 artifacts:
   files:
-    - template.yml   # ✅ explicitly include your template
+    - template.yaml   # ✅ correct filename
     - '**/*'

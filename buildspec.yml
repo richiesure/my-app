@@ -4,13 +4,18 @@ phases:
   install:
     commands:
       - echo "No dependencies to install"
-
+  pre_build:
+    commands:
+      - echo "Preparing build..."
   build:
     commands:
       - echo "Build stage started"
       - echo "Nothing to build, just preparing artifacts"
+  post_build:
+    commands:
+      - echo "Post-build steps complete"
 
 artifacts:
   files:
-    - template.yaml   # ✅ correct filename
-    - '**/*'
+    - template.yaml        # ensures template.yaml is in root of artifact
+  name: BuildOutput        # matches the artifact name in CodePipeline

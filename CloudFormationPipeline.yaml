@@ -3,7 +3,7 @@ Description: CI/CD Pipeline for my-app using CodePipeline and CodeBuild
 
 Resources:
   # ----------------------
-  # CodeBuild Project 
+  # CodeBuild Project
   # ----------------------
   MyAppCodeBuildProject:
     Type: AWS::CodeBuild::Project
@@ -50,7 +50,6 @@ Resources:
                 BranchName: main
               OutputArtifacts:
                 - Name: SourceOutput
-
         # -------- Build Stage --------
         - Name: Build
           Actions:
@@ -63,10 +62,9 @@ Resources:
               InputArtifacts:
                 - Name: SourceOutput
               OutputArtifacts:
-                - Name: BuildOutput
+                - Name: BuildOutput   # <- MUST match exactly
               Configuration:
                 ProjectName: MyAppCodeBuildProject
-
         # -------- Deploy Stage --------
         - Name: Deploy
           Actions:
@@ -77,19 +75,19 @@ Resources:
                 Provider: CloudFormation
                 Version: 1
               InputArtifacts:
-                - Name: BuildOutput
+                - Name: BuildOutput   # <- MUST match exactly
               Configuration:
                 ActionMode: CREATE_UPDATE
-                StackName: MyPlaceholderStack
+                StackName: MyAppDeploymentStack
                 Capabilities: CAPABILITY_IAM
                 TemplatePath: BuildOutput::output-template.yaml
                 RoleArn: arn:aws:iam::150297827048:role/ProdDeploymentRole
 
 Outputs:
   PipelineName:
-    Description: "The name of the created pipeline"
+    Description: The name of the created pipeline
     Value: !Ref MyAppPipeline
 
   CodeBuildProjectName:
-    Description: "The name of the CodeBuild project"
+    Description: The name of the CodeBuild project
     Value: !Ref MyAppCodeBuildProject

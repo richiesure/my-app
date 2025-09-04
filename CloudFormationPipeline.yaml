@@ -73,15 +73,17 @@ Resources:
                 Category: Deploy
                 Owner: AWS
                 Provider: CloudFormation
-                Version: 1
+                Version: '1'
               InputArtifacts:
-                - Name: BuildOutput   # <- MUST match exactly
+                - Name: BuildOutput
               Configuration:
                 ActionMode: CREATE_UPDATE
                 StackName: MyAppDeploymentStack
+                TemplatePath: BuildOutput::template.yml
                 Capabilities: CAPABILITY_IAM
-                TemplatePath: BuildOutput::output-template.yaml
                 RoleArn: arn:aws:iam::150297827048:role/ProdDeploymentRole
+              RunOrder: 1
+
 
 Outputs:
   PipelineName:

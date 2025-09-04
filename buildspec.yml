@@ -1,22 +1,19 @@
 version: 0.2
 
 phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo "Installing dependencies..."
+      - npm install
+
   build:
     commands:
-      - set -euo pipefail
-      - echo "=== CODEBUILD CONTEXT ==="
-      - echo "pwd: $(pwd)"
-      - echo "CODEBUILD_SRC_DIR: ${CODEBUILD_SRC_DIR:-}"
-      - ls -la
-      - echo "=== PREPARE TEMPLATE ==="
-      - test -f template.yaml || { echo "ERROR: template.yaml not found in $(pwd)"; exit 1; }
-      - cp template.yaml output-template.yaml
-      - echo "=== VERIFY ARTIFACT FILE ==="
-      - test -f output-template.yaml || { echo "ERROR: output-template.yaml not created"; exit 1; }
-      - ls -la output-template.yaml
+      - echo "Building the project..."
+      - npm run build
 
 artifacts:
   files:
-    - output-template.yaml
-  # Flatten any folders just in case, so the file is at the root of BuildOutput ZIP
-  discard-paths: yes
+    - '**/*'
+  base-directory: build

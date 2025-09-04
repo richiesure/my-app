@@ -1,51 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Full CodePipeline with CodeBuild and CloudFormation Deploy
-
 Resources:
-
-  # S3 bucket for pipeline artifacts
-  PipelineArtifactBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: cicd-artifacts-150297827048
-
-  # CodeBuild project
-  MyAppCodeBuildProject:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Name: MyAppCodeBuildProject
-      Source:
-        Type: CODEPIPELINE
-      Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/standard:6.0
-        Type: LINUX_CONTAINER
-      ServiceRole: arn:aws:iam::150297827048:role/ProdDeploymentRole
-      Artifacts:
-        Type: CODEPIPELINE
-      TimeoutInMinutes: 30
-      BuildSpec: |
-        version: 0.2
-        phases:
-          install:
-            commands:
-              - echo "No dependencies to install"
-          pre_build:
-            commands:
-              - echo "Preparing build..."
-          build:
-            commands:
-              - echo "Build stage started"
-              - echo "Nothing to build, just preparing artifacts"
-          post_build:
-            commands:
-              - echo "Post-build steps complete"
-        artifacts:
-          files:
-            - template.yaml
-          name: BuildOutput
-
-  # CodePipeline
   MyAppPipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
@@ -61,12 +15,12 @@ Resources:
               ActionTypeId:
                 Category: Source
                 Owner: AWS
-                Provider: CodeCommit  # or GitHub if you use GitHub
+                Provider: CodeCommit
                 Version: 1
               OutputArtifacts:
                 - Name: SourceOutput
               Configuration:
-                RepositoryName: MyRepo   # Replace with your repo
+                RepositoryName: MyAppRepo
                 BranchName: main
               RunOrder: 1
 
@@ -99,7 +53,7 @@ Resources:
               Configuration:
                 ActionMode: CREATE_UPDATE
                 StackName: MyAppDeploymentStack
-                TemplatePath: BuildOutput/template.yaml
+                TemplatePath: BuildOutput::template.yaml   # ✅ Correct double-colon
                 Capabilities: CAPABILITY_IAM
                 RoleArn: arn:aws:iam::150297827048:role/ProdDeploymentRole
               RunOrder: 1

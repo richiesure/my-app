@@ -79,11 +79,10 @@ Resources:
               Configuration:
                 ActionMode: CREATE_UPDATE
                 StackName: MyAppDeploymentStack
-                TemplatePath: BuildOutput::template.yml
+                TemplatePath: BuildOutput::template.yaml   # ✅ must match
                 Capabilities: CAPABILITY_IAM
                 RoleArn: arn:aws:iam::150297827048:role/ProdDeploymentRole
               RunOrder: 1
-
 
 Outputs:
   PipelineName:

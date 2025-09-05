@@ -17,5 +17,4 @@ phases:
 
 artifacts:
   files:
-    - template.yaml        # ensures template.yaml is in root of artifact
-  name: BuildOutput        # matches the artifact name in CodePipeline
+    - template.yaml   # 👈 this makes sure the file is available to CloudFormation
